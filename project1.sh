@@ -44,6 +44,21 @@ avg_att() {
     echo "Average attendance for course $course is: $avg"
 }
 
+# function for task 8: Most frequently used tool
+most_freq() {
+    count_zoom=$(cut -d',' -f1 logs.csv | grep -i "zoom" | wc -l)
+    count_teams=$(cut -d',' -f1 logs.csv | grep -i "teams" | wc -l)
+
+    if [ "$count_zoom" -gt "$count_teams" ]; then
+        echo "Most frequently used tool is: Zoom with frequency: $count_zoom"
+    elif [ "$count_zoom" -eq "$count_teams" ]; then
+        echo "Zoom and Teams are equally used with count: $count_zoom"
+    else
+        echo "Most frequently used tool is: Teams with frequency: $count_teams"
+    fi
+}
+
+
 # Main loop
 while true
  do
@@ -60,7 +75,7 @@ avg_att $course1;;
         5) echo " List of students leaving early";;
         6) echo " Average attendance time";;
         7) echo " Average attendance per instructor";;
-        8) echo " Most frequently used tool";;
+        8) most_freq;;
         9) echo "Thanks for using my program, good bye."; break;;
         *) echo " Invalid choice,please try again.";; #default case
     esac #end case
