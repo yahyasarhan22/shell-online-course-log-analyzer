@@ -18,7 +18,7 @@ echo ""
 echo ""
 }
 
-#function for task 1: Calculate the number of seasons
+# Task 1: Calculate the number of seasons
 n_courses(){
 
 course=$1 #take the name of the course
@@ -28,7 +28,7 @@ cut -d, -f6,9 logs.csv|sort -u |grep "$course"|wc -l
 
 }
 
-# function for task 2: Average Attendance per course
+# Task 2: Average Attendance per course
 avg_att() {
     course=$1
 
@@ -44,7 +44,57 @@ avg_att() {
     echo "Average attendance for course $course is: $avg"
 }
 
-# function for task 8: Most frequently used tool
+
+# Task 7: Average number of attendances per instructor
+avg_att_per_instructor() {
+
+printf "%-12s %-12s %-10s %-8s\n" "Instructor" "Attendances" "Sessions" "Average"
+printf "%-12s %-12s %-10s %-8s\n" "----------" "-----------" "--------" "-------"
+
+    # 1. count total student attendances per instructor
+    # store the value in a temp file called:attendance.txt
+    #(uniq -c):count for each instructor
+    cut -d',' -f5 logs.csv | sort | uniq -c > /tmp/attendances.txt
+    # Example output
+    # N_std	 Instructor	
+    # 6		 I200
+    # 4		 I201
+
+    # 2. count courses per instructor
+    # store the value in a temp file called:sessions.txt
+    #(sort -u): remove the duplucited
+    cut -d',' -f5,6,9 logs.csv | sort -u | cut -d',' -f1 | sort | uniq -c > /tmp/sessions.txt
+    # Example output:
+    #N_course   Instructor
+    # 2		I200
+    # 2		I201
+
+    # 3. match the two files by InstructorID and compute average
+   
+#store the first line into count and id like variables
+     while read count id; do
+      
+       #take the number of courses
+        sess=$(grep " $id" /tmp/sessions.txt | awk '{print $1}')
+       #awk print $1 : extract the first colum ex:2
+	#handle null value
+        if [ -z "$sess" ]; then
+            sess=0
+        fi
+
+        # compute average (floating point using awk)
+        avg=$(awk "BEGIN { if ($sess>0) printf \"%.2f\", $count/$sess; else print 0 }")
+         # tp print the line in perfect way
+        printf "%-12s %-12d %-10d %-8s\n" "$id" "$count" "$sess" "$avg"
+    done < /tmp/attendances.txt #to read from attendace
+}
+
+
+
+
+
+
+# Task 8: Most frequently used tool
 most_freq() {
     count_zoom=$(cut -d',' -f1 logs.csv | grep -i "zoom" | wc -l)
     count_teams=$(cut -d',' -f1 logs.csv | grep -i "teams" | wc -l)
@@ -74,7 +124,7 @@ avg_att $course1;;
         4) echo " List of late arrivals";;
         5) echo " List of students leaving early";;
         6) echo " Average attendance time";;
-        7) echo " Average attendance per instructor";;
+        7) avg_att_per_instructor;;
         8) most_freq;;
         9) echo "Thanks for using my program, good bye."; break;;
         *) echo " Invalid choice,please try again.";; #default case
